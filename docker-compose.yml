@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  fincore-db:
+    image: postgres:16-alpine
+    container_name: fincore-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-fincore_db}
+      POSTGRES_USER: ${DB_USERNAME:-fincore_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fincore_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - fincore_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-fincore_user} -d ${DB_NAME:-fincore_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  fincore-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fincore-app
+    restart: unless-stopped
+    depends_on:
+      fincore-db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://fincore-db:5432/${DB_NAME:-fincore_db}
+      DB_USERNAME: ${DB_USERNAME:-fincore_user}
+      DB_PASSWORD: ${DB_PASSWORD:-fincore_pass}
+      FINCORE_FRAUD_HIGH_VALUE_THRESHOLD: 200000.00
+    ports:
+      - "8080:8080"
+
+volumes:
+  fincore_pgdata:

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: html_head('Customer Dashboard')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-4 py-4">
+    <!-- Top Welcome Banner -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="fw-bold mb-1">Welcome back, <span th:text="${user.fullName}">Customer</span></h2>
+            <p class="text-muted mb-0 small">Real-time ledger overview & active digital accounts</p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-sm-0">
+            <a th:href="@{/transfers}" class="btn btn-primary d-flex align-items-center gap-2">
+                <i class="bi bi-send-fill"></i> New Transfer
+            </a>
+        </div>
+    </div>
+
+    <!-- Overview Stat Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Total Portfolio Value</span>
+                    <i class="bi bi-wallet2 text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-bold mb-0 text-dark">
+                    ₹<span th:text="${#numbers.formatDecimal(totalBalance, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                </h3>
+                <small class="text-success"><i class="bi bi-check-circle-fill"></i> Verified Double-Entry Ledger</small>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Active Accounts</span>
+                    <i class="bi bi-credit-card-2-front text-info fs-4"></i>
+                </div>
+                <h3 class="fw-bold mb-0 text-dark" th:text="${#lists.size(accounts)}">0</h3>
+                <small class="text-muted">Eligible for real-time transfers</small>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Notifications</span>
+                    <i class="bi bi-bell text-warning fs-4"></i>
+                </div>
+                <h3 class="fw-bold mb-0 text-dark">
+                    <span id="notification-badge" class="badge bg-warning text-dark" th:text="${unreadCount}">0</span>
+                </h3>
+                <small class="text-muted">WebSocket STOMP channel active</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accounts Grid -->
+    <h5 class="fw-bold mb-3"><i class="bi bi-bank me-2 text-primary"></i>Your Accounts</h5>
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-4" th:each="acc : ${accounts}">
+            <div class="account-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge bg-light text-dark fw-bold mb-1" th:text="${acc.accountType}">CHECKING</span>
+                        <div class="text-muted small">Account Number</div>
+                        <div class="fw-bold font-monospace fs-5 text-white" th:text="${acc.accountNumber}">ACC-00000</div>
+                    </div>
+                    <span class="badge badge-active" th:text="${acc.status}">ACTIVE</span>
+                </div>
+                <div class="mt-4">
+                    <span class="text-muted small">Available Balance</span>
+                    <h2 class="fw-bold mb-0 text-info">
+                        ₹<span th:text="${#numbers.formatDecimal(acc.balance, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions & Live Stream -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-activity me-2 text-primary"></i>Recent Transactions</h5>
+                <a th:href="@{/transactions}" class="text-decoration-none small fw-semibold">View All &rarr;</a>
+            </div>
+
+            <div class="table-responsive table-custom">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Counterparty</th>
+                            <th>Status</th>
+                            <th>Date (UTC)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-tx-tbody">
+                        <tr th:if="${#lists.isEmpty(recentTransactions)}">
+                            <td colspan="6" class="text-center py-4 text-muted">No recent transactions recorded.</td>
+                        </tr>
+                        <tr th:each="tx : ${recentTransactions}">
+                            <td><code th:text="${tx.referenceNumber}">TX-00000</code></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${tx.sourceAccount != null and tx.sourceAccount.user.username == user.username} ? 'bg-danger' : 'bg-success'"
+                                      th:text="${tx.sourceAccount != null and tx.sourceAccount.user.username == user.username} ? 'DEBIT' : 'CREDIT'">
+                                    TYPE
+                                </span>
+                            </td>
+                            <td>
+                                <strong th:text="'₹' + ${#numbers.formatDecimal(tx.amount, 1, 'COMMA', 2, 'POINT')}">₹0.00</strong>
+                            </td>
+                            <td class="small">
+                                <span th:text="${tx.sourceAccount != null ? tx.sourceAccount.accountNumber : 'EXT'}">SRC</span> &rarr;
+                                <span th:text="${tx.destinationAccount != null ? tx.destinationAccount.accountNumber : 'EXT'}">DST</span>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${tx.status.name() == 'COMPLETED' ? 'bg-success' : (tx.status.name() == 'FLAGGED' ? 'bg-warning text-dark' : 'bg-danger')}"
+                                      th:text="${tx.status}">
+                                    STATUS
+                                </span>
+                            </td>
+                            <td class="small text-muted" th:text="${#temporals.format(tx.createdAt, 'dd-MMM-yyyy HH:mm:ss')}">Time</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-bell-fill me-2 text-warning"></i>Recent Notifications</h5>
+            <div class="list-group shadow-sm border-0 rounded-4">
+                <div th:if="${#lists.isEmpty(notifications)}" class="list-group-item text-center py-4 text-muted">
+                    No new notifications.
+                </div>
+                <div th:each="n : ${notifications}" class="list-group-item list-group-item-action p-3">
+                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                        <h6 class="mb-0 fw-bold" th:text="${n.title}">Notification Title</h6>
+                        <small class="text-muted" th:text="${#temporals.format(n.createdAt, 'HH:mm')}">12:00</small>
+                    </div>
+                    <p class="mb-1 small text-secondary" th:text="${n.message}">Message body</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/header :: scripts}"></div>
+
+</body>
+</html>

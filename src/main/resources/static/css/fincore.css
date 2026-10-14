@@ -1,0 +1,117 @@
+/* FinCore Modern Banking Stylesheet */
+:root {
+    --fc-primary: #0f172a;
+    --fc-secondary: #1e293b;
+    --fc-accent: #0ea5e9;
+    --fc-success: #10b981;
+    --fc-danger: #ef4444;
+    --fc-warning: #f59e0b;
+    --fc-bg: #f8fafc;
+    --fc-card-bg: #ffffff;
+    --fc-text: #1e293b;
+    --fc-text-muted: #64748b;
+    --fc-border: #e2e8f0;
+}
+
+body {
+    background-color: var(--fc-bg);
+    color: var(--fc-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar-fincore {
+    background-color: var(--fc-primary);
+    border-bottom: 2px solid var(--fc-accent);
+}
+
+.navbar-fincore .navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+}
+
+.navbar-fincore .nav-link {
+    color: #94a3b8;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.navbar-fincore .nav-link:hover,
+.navbar-fincore .nav-link.active {
+    color: #ffffff;
+}
+
+.stat-card {
+    background: var(--fc-card-bg);
+    border: 1px solid var(--fc-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.account-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+
+.account-card::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(14,165,233,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.badge-active { background-color: #dcfce7; color: #166534; }
+.badge-frozen { background-color: #fee2e2; color: #991b1b; }
+.badge-completed { background-color: #dcfce7; color: #166534; }
+.badge-flagged { background-color: #fef3c7; color: #92400e; }
+.badge-failed { background-color: #fee2e2; color: #991b1b; }
+
+.table-custom {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid var(--fc-border);
+}
+
+.table-custom th {
+    background-color: #f1f5f9;
+    color: #475569;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    padding: 1rem;
+}
+
+.table-custom td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-top: 1px solid var(--fc-border);
+}
+
+.toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 1080;
+}

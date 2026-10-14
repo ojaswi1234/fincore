@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: html_head('Sign In')}"></head>
+<body class="bg-light d-flex align-items-center justify-content-center py-5">
+
+<div class="container" style="max-width: 460px;">
+    <div class="text-center mb-4">
+        <i class="bi bi-shield-lock-fill text-primary" style="font-size: 3rem;"></i>
+        <h2 class="fw-bold mt-2 text-dark">FinCore</h2>
+        <p class="text-muted small">Real-Time Banking & Transaction Management System</p>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 p-4">
+        <div class="card-body">
+            <h4 class="card-title fw-bold mb-3">Sign In</h4>
+
+            <div th:if="${param.error}" class="alert alert-danger py-2 small" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-1"></i> Invalid username or password.
+            </div>
+            <div th:if="${param.logout}" class="alert alert-info py-2 small" role="alert">
+                <i class="bi bi-info-circle-fill me-1"></i> You have signed out successfully.
+            </div>
+            <div th:if="${param.registered}" class="alert alert-success py-2 small" role="alert">
+                <i class="bi bi-check-circle-fill me-1"></i> Registration successful! You may now sign in.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label small fw-semibold text-secondary">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="e.g. john_doe" required autofocus>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label small fw-semibold text-secondary">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-3">Sign In</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <span class="small text-muted">Don't have an account? </span>
+                <a th:href="@{/register}" class="small text-decoration-none fw-semibold">Open Account</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Credentials Quick-Select Helper -->
+    <div class="card shadow-sm border-0 rounded-4 mt-4 bg-white p-3">
+        <div class="card-body p-1">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="small fw-bold text-secondary"><i class="bi bi-key-fill text-warning me-1"></i> Demo Credentials</span>
+                <span class="badge bg-light text-muted border">1-Click Fill</span>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm text-start demo-login-btn" data-u="john_doe" data-p="Customer@123">
+                    <div class="d-flex justify-content-between">
+                        <strong>Customer 1 (John Doe)</strong>
+                        <span class="badge bg-success">₹2,25,000</span>
+                    </div>
+                    <small class="text-muted">User: <code>john_doe</code> | Pass: <code>Customer@123</code></small>
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm text-start demo-login-btn" data-u="jane_smith" data-p="Customer@123">
+                    <div class="d-flex justify-content-between">
+                        <strong>Customer 2 (Jane Smith)</strong>
+                        <span class="badge bg-success">₹45,000</span>
+                    </div>
+                    <small class="text-muted">User: <code>jane_smith</code> | Pass: <code>Customer@123</code></small>
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm text-start demo-login-btn" data-u="admin" data-p="Admin@123">
+                    <div class="d-flex justify-content-between">
+                        <strong>System Admin</strong>
+                        <span class="badge bg-danger">Full Audit</span>
+                    </div>
+                    <small class="text-muted">User: <code>admin</code> | Pass: <code>Admin@123</code></small>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll(".demo-login-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.getElementById("username").value = btn.getAttribute("data-u");
+            document.getElementById("password").value = btn.getAttribute("data-p");
+        });
+    });
+</script>
+
+</body>
+</html>

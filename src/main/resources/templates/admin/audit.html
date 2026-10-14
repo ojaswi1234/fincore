@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: html_head('System Audit Trail')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-journal-text text-primary me-2"></i>System Security & Audit Trail</h2>
+            <p class="text-muted small mb-0">Immutable tracking of financial activities, security violations, and administrative decisions</p>
+        </div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-outline-secondary btn-sm">&larr; Admin Overview</a>
+    </div>
+
+    <div class="table-responsive table-custom mb-4">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Log ID</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Resource</th>
+                    <th>Resource ID</th>
+                    <th>Client IP</th>
+                    <th>Details</th>
+                    <th>Timestamp (UTC)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${auditPage.empty}">
+                    <td colspan="8" class="text-center py-4 text-muted">No audit events recorded.</td>
+                </tr>
+                <tr th:each="audit : ${auditPage.content}">
+                    <td class="fw-bold" th:text="${'#AUD-' + audit.id}">#AUD-1</td>
+                    <td th:text="${audit.username}">username</td>
+                    <td><span class="badge bg-secondary" th:text="${audit.action}">ACTION</span></td>
+                    <td class="small" th:text="${audit.resourceType}">RESOURCE</td>
+                    <td><code th:text="${audit.resourceId}">ID</code></td>
+                    <td class="small font-monospace text-muted" th:text="${audit.ipAddress}">IP</td>
+                    <td class="small" th:text="${audit.details}">Details</td>
+                    <td class="small text-muted" th:text="${#temporals.format(audit.createdAt, 'dd-MMM-yyyy HH:mm:ss')}">Time</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div th:replace="~{fragments/header :: scripts}"></div>
+
+</body>
+</html>

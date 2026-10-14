@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: html_head('Admin Operational Monitor')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-shield-shaded text-danger me-2"></i>Operational Compliance & Transaction Monitor</h2>
+            <p class="text-muted small mb-0">System-wide ledger monitoring, real-time event distribution, fraud alert inspection</p>
+        </div>
+        <span class="badge bg-danger px-3 py-2 fs-6">ADMINISTRATIVE ACCESS</span>
+    </div>
+
+    <!-- Admin Metric Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card border-primary">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Total Ledger Accounts</span>
+                    <i class="bi bi-person-lines-fill text-primary fs-3"></i>
+                </div>
+                <h3 class="fw-bold mb-0 text-dark" th:text="${totalAccounts}">0</h3>
+                <small class="text-muted">PostgreSQL validated accounts</small>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card border-info">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Total Executed Transactions</span>
+                    <i class="bi bi-arrow-left-right text-info fs-3"></i>
+                </div>
+                <h3 class="fw-bold mb-0 text-dark" th:text="${totalTransactions}">0</h3>
+                <small class="text-muted">Immutable ledger records</small>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card border-warning">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Pending Fraud Reviews</span>
+                    <i class="bi bi-exclamation-diamond text-warning fs-3"></i>
+                </div>
+                <h3 class="fw-bold mb-0 text-danger" th:text="${pendingAlerts}">0</h3>
+                <small><a th:href="@{/admin/alerts}" class="text-decoration-none">Review Flagged Transactions &rarr;</a></small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Real-Time Activity Feed via WebSocket STOMP -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-broadcast text-danger me-2"></i>Live STOMP Transaction Feed</h5>
+                    <span class="badge bg-success"><i class="bi bi-circle-fill" style="font-size: 8px;"></i> /topic/admin/activity</span>
+                </div>
+                <div class="card-body p-0">
+                    <ul id="admin-live-feed" class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                        <li class="list-group-item text-muted text-center py-4">Waiting for real-time transaction events...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flagged Fraud Alerts Table -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-shield-exclamation text-warning me-2"></i>Requires Compliance Review</h5>
+                    <a th:href="@{/admin/alerts}" class="btn btn-outline-primary btn-sm">View All Alerts</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Severity</th>
+                                    <th>User</th>
+                                    <th>Reason</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(activeAlerts)}">
+                                    <td colspan="4" class="text-center py-4 text-muted">No pending compliance alerts.</td>
+                                </tr>
+                                <tr th:each="alert : ${activeAlerts}">
+                                    <td>
+                                        <span class="badge" th:classappend="${alert.severity.name() == 'HIGH' ? 'bg-danger' : 'bg-warning text-dark'}" th:text="${alert.severity}">HIGH</span>
+                                    </td>
+                                    <td><strong th:text="${alert.user.username}">user</strong></td>
+                                    <td class="small" th:text="${alert.description}">Reason</td>
+                                    <td>
+                                        <form th:action="@{'/admin/alerts/' + ${alert.id} + '/resolve'}" method="post" class="d-inline">
+                                            <input type="hidden" name="decision" value="RESOLVED">
+                                            <button type="submit" class="btn btn-sm btn-success py-0">Approve</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/header :: scripts}"></div>
+
+</body>
+</html>

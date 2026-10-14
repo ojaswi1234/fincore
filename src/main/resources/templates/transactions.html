@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: html_head('Transaction History')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-clock-history text-primary me-2"></i>Audit Transaction History</h2>
+            <p class="text-muted small mb-0">Immutable ledger transaction log with double-entry balance assurance</p>
+        </div>
+        <a th:href="@{/dashboard}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
+    </div>
+
+    <div class="table-responsive table-custom mb-4">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Reference</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Source Account</th>
+                    <th>Destination Account</th>
+                    <th>Status</th>
+                    <th>Description</th>
+                    <th>Timestamp (UTC)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${transactionPage.empty}">
+                    <td colspan="8" class="text-center py-4 text-muted">No transactions recorded for this account.</td>
+                </tr>
+                <tr th:each="tx : ${transactionPage.content}">
+                    <td><code class="fw-bold" th:text="${tx.referenceNumber}">TX-00000</code></td>
+                    <td><span class="badge bg-secondary" th:text="${tx.transactionType}">TRANSFER</span></td>
+                    <td><strong th:text="'₹' + ${#numbers.formatDecimal(tx.amount, 1, 'COMMA', 2, 'POINT')}">₹0.00</strong></td>
+                    <td class="font-monospace small" th:text="${tx.sourceAccount != null ? tx.sourceAccount.accountNumber : 'EXTERNAL'}">ACC-001</td>
+                    <td class="font-monospace small" th:text="${tx.destinationAccount != null ? tx.destinationAccount.accountNumber : 'EXTERNAL'}">ACC-002</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${tx.status.name() == 'COMPLETED' ? 'bg-success' : (tx.status.name() == 'FLAGGED' ? 'bg-warning text-dark' : 'bg-danger')}"
+                              th:text="${tx.status}">
+                            STATUS
+                        </span>
+                    </td>
+                    <td class="small text-muted" th:text="${tx.description}">Description</td>
+                    <td class="small text-muted" th:text="${#temporals.format(tx.createdAt, 'dd-MMM-yyyy HH:mm:ss')}">Timestamp</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination controls -->
+    <div class="d-flex justify-content-between align-items-center" th:if="${totalPages > 1}">
+        <span class="small text-muted">Page <span th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">1</span></span>
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/transactions(page=${currentPage - 1})}">Previous</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${currentPage == i} ? 'active'">
+                <a class="page-link" th:href="@{/transactions(page=${i})}" th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link" th:href="@{/transactions(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div th:replace="~{fragments/header :: scripts}"></div>
+
+</body>
+</html>

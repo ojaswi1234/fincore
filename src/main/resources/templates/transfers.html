@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: html_head('Funds Transfer')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container py-5" style="max-width: 700px;">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-send-check text-primary me-2"></i>Fund Transfer</h2>
+            <p class="text-muted small mb-0">Atomic double-entry transaction engine with idempotency protection</p>
+        </div>
+        <a th:href="@{/dashboard}" class="btn btn-outline-secondary btn-sm">&larr; Back to Dashboard</a>
+    </div>
+
+    <!-- Feedback Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}">Success</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${warningMessage}" class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${warningMessage}">Warning</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-x-circle-fill me-2"></i> <span th:text="${errorMessage}">Error</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 p-4">
+        <div class="card-body">
+            <form th:action="@{/transfers}" th:object="${transferDto}" method="post">
+                <input type="hidden" th:field="*{idempotencyKey}">
+
+                <!-- Source Account -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary small">From Account (Source)</label>
+                    <select class="form-select form-select-lg" th:field="*{sourceAccountNumber}" required>
+                        <option value="" disabled selected>Select debited account</option>
+                        <option th:each="acc : ${myAccounts}"
+                                th:value="${acc.accountNumber}"
+                                th:text="${acc.accountNumber + ' (' + acc.accountType + ') - Available: ₹' + #numbers.formatDecimal(acc.balance, 1, 'COMMA', 2, 'POINT')}">
+                            ACC-00000
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Destination Account -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary small">To Account (Destination)</label>
+                    <input type="text" class="form-control form-control-lg font-monospace" id="destinationAccountNumber" th:field="*{destinationAccountNumber}" placeholder="e.g. ACC-20001" required>
+                    <div class="d-flex align-items-center gap-2 mt-2">
+                        <span class="small text-muted">Quick fill demo recipients:</span>
+                        <button type="button" class="btn btn-outline-info btn-sm py-0 quick-fill-btn" data-account="ACC-20001">Jane's Checking (ACC-20001)</button>
+                        <button type="button" class="btn btn-outline-info btn-sm py-0 quick-fill-btn" data-account="ACC-10001">John's Checking (ACC-10001)</button>
+                    </div>
+                </div>
+
+                <!-- Amount in INR -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary small">Amount (INR)</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text fw-bold">₹</span>
+                        <input type="number" step="0.01" min="0.01" class="form-control" th:field="*{amount}" placeholder="0.00" required>
+                    </div>
+                    <small class="text-muted">Thresholds: Amounts &ge; ₹2,00,000 trigger automated fraud review simulation.</small>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold text-secondary small">Description / Payment Memo</label>
+                    <input type="text" class="form-control" th:field="*{description}" placeholder="e.g. Invoice settlement or personal transfer">
+                </div>
+
+                <div class="p-3 bg-light rounded-3 mb-4 border">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-shield-lock-fill text-success me-1"></i> Idempotency Token Active</small>
+                        <code class="small text-secondary" th:text="*{idempotencyKey}">UUID</code>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 fs-5">
+                    <i class="bi bi-arrow-right-circle-fill me-2"></i> Authorize & Execute Transfer
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/header :: scripts}"></div>
+
+</body>
+</html>
