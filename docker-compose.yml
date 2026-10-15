@@ -1,5 +1,4 @@
-version: '2.4'
-
+# Latest Docker Compose Specification (Compose V2)
 services:
   fincore-db:
     image: postgres:16-alpine
