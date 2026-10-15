@@ -4,6 +4,20 @@ FinCore is an enterprise-grade financial simulation platform built with **Java 2
 
 ---
 
+## Application Preview
+
+### 👤 Customer Banking Portal (`ROLE_CUSTOMER`)
+Real-time ledger overview, active checking and savings accounts with verified double-entry balances, and live WebSocket STOMP status.
+
+![FinCore Customer Portal](docs/screenshots/fincore_customer_dashboard.png)
+
+### 🛡️ Operational Compliance & Transaction Monitor (`ROLE_ADMIN`)
+Centralized administrative console with live STOMP transaction event feed (`/topic/admin/activity`), PostgreSQL validated account summaries, and fraud alert inspection.
+
+![FinCore Admin Dashboard](docs/screenshots/fincore_admin_dashboard.png)
+
+---
+
 ## 1. Problem Statement
 Traditional banking and ledger systems require zero margin for error:
 - Race conditions during concurrent transfers can cause double-spending and overdrafts.
