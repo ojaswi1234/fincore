@@ -40,6 +40,7 @@ jobs:
 
       - name: Compile and Run Automated Verification
         env:
+          SPRING_PROFILES_ACTIVE: postgres
           DB_URL: jdbc:postgresql://localhost:5432/fincore_db
           DB_USERNAME: fincore_user
           DB_PASSWORD: fincore_pass

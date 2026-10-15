@@ -28,6 +28,7 @@ services:
       fincore-db:
         condition: service_healthy
     environment:
+      SPRING_PROFILES_ACTIVE: postgres
       DB_URL: jdbc:postgresql://fincore-db:5432/${DB_NAME:-fincore_db}
       DB_USERNAME: ${DB_USERNAME:-fincore_user}
       DB_PASSWORD: ${DB_PASSWORD:-fincore_pass}
